@@ -27,6 +27,19 @@
 .App-link {
   color: #61dafb;
 }
+.date-divider-row td {
+  background-color: #e0f0ff !important;
+}
+
+.table th {
+  background-color: #0d6efd;
+  color: white;
+  text-align: center;
+}
+
+button {
+  font-size: 0.875rem;
+}
 
 @keyframes App-logo-spin {
   from {
