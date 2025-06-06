@@ -7,25 +7,41 @@ import logo from './logo.jpeg';
 function App() {
   return (
     <div className="container py-4">
-      {/* Bố cục hàng đầu tiên gồm logo bên trái và tiêu đề bên phải */}
-      <div className="d-flex align-items-center justify-content-between mb-4" style={{ position: "relative", minHeight: 120 }}>
-  <img src={logo} alt="Trung tâm Y tế Hải Lăng" height={120} style={{ zIndex: 1 }} />
-  <h1
-    className="text-danger"
-    style={{
-      position: "absolute",
-      left: "50%",
-      top: "50%",
-      transform: "translate(-50%, -50%)",
-      margin: 0,
-      width: "100%",
-      textAlign: "center",
-      zIndex: 0
-    }}
-  >
-    LỊCH CÔNG TÁC TUẦN
-  </h1>
-</div>
+      {/* Header: Logo bên trái, tiêu đề căn giữa màn hình */}
+      <div
+        className="mb-4"
+        style={{
+          position: "relative",
+          minHeight: 120,
+          display: "flex",
+          alignItems: "center"
+        }}
+      >
+        {/* Logo ở bên trái, không đổi */}
+        <img
+          src={logo}
+          alt="Trung tâm Y tế Hải Lăng"
+          height={120}
+          style={{ zIndex: 1 }}
+        />
+        {/* Tiêu đề căn giữa tuyệt đối */}
+        <h1
+          className="text-danger"
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            margin: 0,
+            width: "100%",
+            textAlign: "center",
+            zIndex: 0,
+            pointerEvents: "none", // tránh chặn click vào logo
+            userSelect: "none"
+          }}
+        >
+          LỊCH CÔNG TÁC TUẦN
+        </h1>
       </div>
 
       {/* Bảng công việc */}
