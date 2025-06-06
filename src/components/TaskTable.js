@@ -89,7 +89,6 @@ function TaskTable() {
     const updated = { ...tasks };
     for (const key in updated) {
       updated[key] = updated[key].filter(t => t.id !== id);
-      // Xoá ngày nếu không còn công việc
       if (updated[key].length === 0) {
         delete updated[key];
       }
@@ -116,7 +115,6 @@ function TaskTable() {
               </div>
             </td>
           </tr>
-
           {tasksByDate.map(task => (
             <tr key={task.id}>
               <td style={{ width: '160px' }}>{formatDateFull(task.date)}</td>
@@ -132,7 +130,6 @@ function TaskTable() {
               )}
             </tr>
           ))}
-
           <tr>
             <td colSpan={showActions ? 6 : 5} className="text-end fst-italic text-secondary">
               Tổng: {tasksByDate.length} công việc
@@ -147,11 +144,7 @@ function TaskTable() {
 
   return (
     <div>
-      <div className="d-flex justify-content-start align-items-center gap-3 mb-4">
-        {/* Logo bạn có thể thêm nếu muốn */}
-        {/* <img src={logo} alt="Logo" style={{ height: '50px' }} className="me-3" /> */}
-        {/* <h5 className="mb-0">Trung tâm y tế Hải Lăng</h5> */}
-      </div>
+      <div className="d-flex justify-content-start align-items-center gap-3 mb-4"></div>
 
       <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap">
         <Button variant="outline-primary" className="rounded-circle shadow" onClick={() => handleChange(-1)}>
@@ -174,9 +167,17 @@ function TaskTable() {
         </Button>
       </div>
 
-      {/* Table với header cố định */}
-      <div id="task-table-scroll" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-        <table className="table table-bordered" style={{ minWidth: '900px' }}>
+      {/* Table tràn ngang màn hình */}
+      <div
+        id="task-table-scroll"
+        style={{
+          maxHeight: '60vh',
+          overflowY: 'auto',
+          overflowX: 'auto',
+          width: '100vw',     // Thêm dòng này để tràn ngang ra hết khung màn hình
+        }}
+      >
+        <table className="table table-bordered" style={{ minWidth: '1200px', width: '100%' }}>
           <thead className="bg-white" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
             <tr>
               <th style={{ width: '160px' }}>Thời gian</th>
