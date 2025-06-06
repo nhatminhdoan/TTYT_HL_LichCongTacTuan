@@ -29,7 +29,7 @@ function TaskTable() {
             div.scrollTop += 1; // Scroll down
           }
         }
-      }, 30); // Adjust speed here
+      }, 60); // Adjust speed here
     }
     return () => clearInterval(interval);
   }, [scrolling]);
