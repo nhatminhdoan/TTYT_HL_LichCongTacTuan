@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
@@ -14,18 +14,22 @@ function TaskTable() {
   const [scrolling, setScrolling] = useState(false);
   const [newTask, setNewTask] = useState({ id: null, date: '', content: '', dept: '', location: '', note: '' });
 
+  const scrollRef = useRef(null);
+
+  // Auto-scroll with infinite loop effect
   useEffect(() => {
     let interval;
     if (scrolling) {
       interval = setInterval(() => {
-        const div = document.getElementById("task-table-scroll");
+        const div = scrollRef.current;
         if (div) {
-          div.scrollBy({ top: 1, behavior: 'smooth' });
-          if (div.scrollTop + div.clientHeight >= div.scrollHeight) {
-            div.scrollTo({ top: 0 });
+          if (div.scrollTop + div.clientHeight >= div.scrollHeight - 1) {
+            div.scrollTop = 0; // Reset to top when reaching bottom
+          } else {
+            div.scrollTop += 1; // Scroll down
           }
         }
-      }, 50);
+      }, 30); // Adjust speed here
     }
     return () => clearInterval(interval);
   }, [scrolling]);
@@ -168,6 +172,7 @@ function TaskTable() {
       </div>
 
       <div
+        ref={scrollRef}
         id="task-table-scroll"
         style={{
           maxHeight: '65vh',
