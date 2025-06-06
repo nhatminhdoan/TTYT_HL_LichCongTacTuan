@@ -109,29 +109,30 @@ function TaskTable() {
       rows.push(
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
-            <td colSpan={showActions ? 6 : 5} className="bg-light">
-              <div className="border-start border-4 border-primary ps-2 py-2 fw-bold text-primary bg-info-subtle">
+            <td colSpan={showActions ? 6 : 5} className="bg-light" style={{padding: '8px 14px'}}>
+              <div className="border-start border-4 border-primary ps-2 py-2 fw-bold text-primary bg-info-subtle fs-6">
                 {formatDateFull(date)}
               </div>
             </td>
           </tr>
           {tasksByDate.map(task => (
             <tr key={task.id}>
-              <td style={{ width: '160px' }}>{formatDateFull(task.date)}</td>
-              <td style={{ width: '320px' }}>{task.content}</td>
-              <td style={{ width: '160px' }}>{task.dept}</td>
-              <td style={{ width: '160px' }}>{task.location}</td>
-              <td style={{ width: '160px' }}>{task.note}</td>
+              <td style={{ minWidth: 120 }}>{formatDateFull(task.date)}</td>
+              <td style={{ minWidth: 180 }}>{task.content}</td>
+              <td style={{ minWidth: 120 }}>{task.dept}</td>
+              <td style={{ minWidth: 120 }}>{task.location}</td>
+              <td style={{ minWidth: 120 }}>{task.note}</td>
               {showActions && (
-                <td style={{ width: '140px' }} className="text-nowrap">
-                  <Button variant="warning" size="sm" className="me-1" onClick={() => { setNewTask(task); setShow(true); }}>Sửa</Button>
+                <td style={{ minWidth: 100 }} className="text-nowrap">
+                  <Button variant="warning" size="sm" className="me-1"
+                    onClick={() => { setNewTask(task); setShow(true); }}>Sửa</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDelete(task.id)}>Xoá</Button>
                 </td>
               )}
             </tr>
           ))}
           <tr>
-            <td colSpan={showActions ? 6 : 5} className="text-end fst-italic text-secondary">
+            <td colSpan={showActions ? 6 : 5} className="text-end fst-italic text-secondary" style={{background:'#f9f9f9'}}>
               Tổng: {tasksByDate.length} công việc
             </td>
           </tr>
@@ -144,55 +145,58 @@ function TaskTable() {
 
   return (
     <div>
-      <div className="d-flex justify-content-start align-items-center gap-3 mb-4"></div>
-
       <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap">
-        <Button variant="outline-primary" className="rounded-circle shadow" onClick={() => handleChange(-1)}>
+        <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(-1)}>
           <FaChevronLeft />
         </Button>
         <div className="fw-bold fs-5 text-dark">
           {formatDateVN(start)} - {formatDateVN(end)}
         </div>
-        <Button variant="outline-primary" className="rounded-circle shadow" onClick={() => handleChange(1)}>
+        <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(1)}>
           <FaChevronRight />
         </Button>
-        <Button variant="success" className="rounded-circle shadow" onClick={() => setShow(true)}>
+        <Button variant="success" className="rounded-circle shadow-sm" onClick={() => setShow(true)}>
           <FaPlus />
         </Button>
-        <Button variant="info" className="rounded-circle shadow" onClick={() => setScrolling(!scrolling)}>
+        <Button variant="info" className="rounded-circle shadow-sm" onClick={() => setScrolling(!scrolling)}>
           <FaArrowDown />
         </Button>
-        <Button variant={showActions ? "secondary" : "outline-secondary"} className="shadow" onClick={() => setShowActions(!showActions)}>
+        <Button variant={showActions ? "secondary" : "outline-secondary"} className="shadow-sm"
+          onClick={() => setShowActions(!showActions)}>
           {showActions ? "Ẩn" : "Hiện"}
         </Button>
       </div>
 
-      {/* Table tràn ngang màn hình */}
       <div
         id="task-table-scroll"
         style={{
-          maxHeight: '60vh',
+          maxHeight: '65vh',
           overflowY: 'auto',
           overflowX: 'auto',
-          width: '100vw',     // Thêm dòng này để tràn ngang ra hết khung màn hình
+          width: '100%',
+          maxWidth: 1200,
+          margin: '0 auto',
+          boxShadow: '0 2px 8px #0001',
+          borderRadius: 10,
+          background: '#fff'
         }}
       >
-        <table className="table table-bordered" style={{ minWidth: '1200px', width: '100%' }}>
+        <table className="table table-bordered mb-0" style={{ minWidth: 900, fontSize: 15 }}>
           <thead className="bg-white" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
             <tr>
-              <th style={{ width: '160px' }}>Thời gian</th>
-              <th style={{ width: '320px' }}>Nội dung</th>
-              <th style={{ width: '160px' }}>Người thực hiện</th>
-              <th style={{ width: '160px' }}>Địa điểm</th>
-              <th style={{ width: '160px' }}>Ghi chú</th>
-              {showActions && <th style={{ width: '140px' }}>Hành động</th>}
+              <th style={{ minWidth: 120 }}>Thời gian</th>
+              <th style={{ minWidth: 180 }}>Nội dung</th>
+              <th style={{ minWidth: 120 }}>Người thực hiện</th>
+              <th style={{ minWidth: 120 }}>Địa điểm</th>
+              <th style={{ minWidth: 120 }}>Ghi chú</th>
+              {showActions && <th style={{ minWidth: 100 }}>Hành động</th>}
             </tr>
           </thead>
           <tbody>{renderRows()}</tbody>
         </table>
       </div>
 
-      {/* Modal thêm / sửa công việc */}
+      {/* Modal thêm/sửa công việc */}
       <Modal show={show} onHide={() => setShow(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>{newTask.id ? 'Cập nhật công việc' : 'Thêm công việc'}</Modal.Title>
