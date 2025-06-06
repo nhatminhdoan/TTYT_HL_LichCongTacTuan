@@ -181,7 +181,7 @@ function TaskTable() {
             <tr>
               <th style={{ width: '160px' }}>Thời gian</th>
               <th style={{ width: '320px' }}>Nội dung</th>
-              <th style={{ width: '160px' }}>Phòng ban</th>
+              <th style={{ width: '160px' }}>Người thực hiện</th>
               <th style={{ width: '160px' }}>Địa điểm</th>
               <th style={{ width: '160px' }}>Ghi chú</th>
               {showActions && <th style={{ width: '140px' }}>Hành động</th>}
@@ -216,7 +216,7 @@ function TaskTable() {
               />
             </Form.Group>
             <Form.Group className="mb-2">
-              <Form.Label>Phòng ban</Form.Label>
+              <Form.Label>Người thực hiện</Form.Label>
               <Form.Control
                 value={newTask.dept}
                 onChange={e => setNewTask({ ...newTask, dept: e.target.value })}
