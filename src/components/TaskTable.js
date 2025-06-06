@@ -2,12 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
-function TaskTable() {
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem("tasks");
-    return saved ? JSON.parse(saved) : {};
-  });
+import { db } from '../firebase';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy
+} from "firebase/firestore";
 
+function TaskTable() {
+  const [tasks, setTasks] = useState([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [show, setShow] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -34,6 +42,16 @@ function TaskTable() {
     return () => clearInterval(interval);
   }, [scrolling]);
 
+  // Realtime listener lấy tasks từ Firestore
+  useEffect(() => {
+    const q = query(collection(db, "tasks"), orderBy("date", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTasks(data);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const getWeekRange = (date) => {
     const start = new Date(date);
     const day = start.getDay();
@@ -56,7 +74,8 @@ function TaskTable() {
 
   const [start, end] = getWeekRange(currentWeek);
 
-  const filteredTasks = Object.values(tasks).flat().filter(task => {
+  // Lọc tasks hiển thị theo tuần
+  const filteredTasks = tasks.filter(task => {
     const taskDate = new Date(task.date);
     return taskDate >= start && taskDate <= end;
   }).sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -67,38 +86,40 @@ function TaskTable() {
     setCurrentWeek(newWeek);
   };
 
-  const handleSave = () => {
+  // Thêm/sửa task lên Firestore
+  const handleSave = async () => {
     if (!newTask.date || !newTask.content.trim()) {
       alert("Vui lòng nhập ngày và nội dung công việc.");
       return;
     }
-    const key = formatDateVN(new Date(newTask.date));
-    const updatedDayTasks = tasks[key] ? [...tasks[key]] : [];
-
-    if (newTask.id) {
-      const index = updatedDayTasks.findIndex(t => t.id === newTask.id);
-      if (index > -1) updatedDayTasks[index] = newTask;
-    } else {
-      updatedDayTasks.push({ ...newTask, id: Date.now() });
+    try {
+      if (newTask.id) {
+        // Sửa công việc cũ
+        const ref = doc(db, "tasks", newTask.id);
+        await updateDoc(ref, {
+          ...newTask
+        });
+      } else {
+        // Thêm công việc mới
+        await addDoc(collection(db, "tasks"), newTask);
+      }
+      setShow(false);
+      setNewTask({ id: null, date: '', content: '', dept: '', location: '', note: '' });
+    } catch (err) {
+      alert("Có lỗi xảy ra khi lưu dữ liệu!");
+      console.error(err);
     }
-
-    const updatedTasks = { ...tasks, [key]: updatedDayTasks };
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-    setShow(false);
-    setNewTask({ id: null, date: '', content: '', dept: '', location: '', note: '' });
   };
 
-  const handleDelete = (id) => {
-    const updated = { ...tasks };
-    for (const key in updated) {
-      updated[key] = updated[key].filter(t => t.id !== id);
-      if (updated[key].length === 0) {
-        delete updated[key];
-      }
+  // Xoá task khỏi Firestore
+  const handleDelete = async (id) => {
+    try {
+      const ref = doc(db, "tasks", id);
+      await deleteDoc(ref);
+    } catch (err) {
+      alert("Có lỗi khi xoá!");
+      console.error(err);
     }
-    setTasks(updated);
-    localStorage.setItem("tasks", JSON.stringify(updated));
   };
 
   const renderRows = () => {
