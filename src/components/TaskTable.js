@@ -174,7 +174,7 @@ function TaskTable() {
           overflowY: 'auto',
           overflowX: 'auto',
           width: '100%',
-          maxWidth: 1200,
+          maxWidth: '100vw',
           margin: '0 auto',
           boxShadow: '0 2px 8px #0001',
           borderRadius: 10,
