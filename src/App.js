@@ -11,8 +11,7 @@ function App() {
       <div className="d-flex align-items-center justify-content-start mb-4 gap-3">
         <img src={logo} alt="Trung tâm Y tế Hải Lăng" height={120} />
         <div>
-          <h1 className="text-primary mb-1">TRUNG TÂM Y TẾ HẢI LĂNG</h1>
-          <h4 className="text-danger">LỊCH CÔNG TÁC TUẦN</h4>
+          <h1 className="text-danger">LỊCH CÔNG TÁC TUẦN</h1>
         </div>
       </div>
 
