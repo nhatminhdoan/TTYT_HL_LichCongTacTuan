@@ -37,7 +37,8 @@ function App() {
             textAlign: "center",
             zIndex: 0,
             pointerEvents: "none", // tránh chặn click vào logo
-            userSelect: "none"
+            userSelect: "none",
+            fontSize: "3rem"
           }}
         >
           LỊCH CÔNG TÁC TUẦN
