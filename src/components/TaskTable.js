@@ -2,18 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
-import { db } from '../firebase';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  orderBy
-} from "firebase/firestore";
-
 function TaskTable() {
   const [tasks, setTasks] = useState([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -23,6 +11,14 @@ function TaskTable() {
   const [newTask, setNewTask] = useState({ id: null, date: '', content: '', dept: '', location: '', note: '' });
 
   const scrollRef = useRef(null);
+
+  // Load tasks from localStorage on mount
+  useEffect(() => {
+    const data = localStorage.getItem("tasks");
+    if (data) {
+      setTasks(JSON.parse(data));
+    }
+  }, []);
 
   // Auto-scroll with infinite loop effect
   useEffect(() => {
@@ -37,20 +33,16 @@ function TaskTable() {
             div.scrollTop += 1; // Scroll down
           }
         }
-      }, 60); // Adjust speed here
+      }, 60);
     }
     return () => clearInterval(interval);
   }, [scrolling]);
 
-  // Realtime listener lấy tasks từ Firestore
-  useEffect(() => {
-    const q = query(collection(db, "tasks"), orderBy("date", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTasks(data);
-    });
-    return () => unsubscribe();
-  }, []);
+  // Save tasks to localStorage helper
+  const saveTasksToLocal = (newTasks) => {
+    localStorage.setItem("tasks", JSON.stringify(newTasks));
+    setTasks(newTasks);
+  };
 
   const getWeekRange = (date) => {
     const start = new Date(date);
@@ -86,40 +78,29 @@ function TaskTable() {
     setCurrentWeek(newWeek);
   };
 
-  // Thêm/sửa task lên Firestore
-  const handleSave = async () => {
+  // Thêm/sửa task vào localStorage
+  const handleSave = () => {
     if (!newTask.date || !newTask.content.trim()) {
       alert("Vui lòng nhập ngày và nội dung công việc.");
       return;
     }
-    try {
-      if (newTask.id) {
-        // Sửa công việc cũ
-        const ref = doc(db, "tasks", newTask.id);
-        await updateDoc(ref, {
-          ...newTask
-        });
-      } else {
-        // Thêm công việc mới
-        await addDoc(collection(db, "tasks"), newTask);
-      }
-      setShow(false);
-      setNewTask({ id: null, date: '', content: '', dept: '', location: '', note: '' });
-    } catch (err) {
-      alert("Có lỗi xảy ra khi lưu dữ liệu!");
-      console.error(err);
+    let updatedTasks;
+    if (newTask.id) {
+      // Sửa công việc cũ
+      updatedTasks = tasks.map(task => task.id === newTask.id ? newTask : task);
+    } else {
+      // Thêm công việc mới
+      updatedTasks = [...tasks, { ...newTask, id: Date.now().toString() }];
     }
+    saveTasksToLocal(updatedTasks);
+    setShow(false);
+    setNewTask({ id: null, date: '', content: '', dept: '', location: '', note: '' });
   };
 
-  // Xoá task khỏi Firestore
-  const handleDelete = async (id) => {
-    try {
-      const ref = doc(db, "tasks", id);
-      await deleteDoc(ref);
-    } catch (err) {
-      alert("Có lỗi khi xoá!");
-      console.error(err);
-    }
+  // Xoá task khỏi localStorage
+  const handleDelete = (id) => {
+    const updatedTasks = tasks.filter(task => task.id !== id);
+    saveTasksToLocal(updatedTasks);
   };
 
   const renderRows = () => {
