@@ -8,7 +8,7 @@ function TaskTable() {
   const [show, setShow] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [scrolling, setScrolling] = useState(false);
-  const [newTask, setNewTask] = useState({ id: null, date: '', content: '', dept: '', location: '', note: '' });
+  const [newTask, setNewTask] = useState({ id: null, date: '', content: '', dept: '', location: '' });
 
   const scrollRef = useRef(null);
 
@@ -28,9 +28,9 @@ function TaskTable() {
         const div = scrollRef.current;
         if (div) {
           if (div.scrollTop + div.clientHeight >= div.scrollHeight - 1) {
-            div.scrollTop = 0; // Reset to top when reaching bottom
+            div.scrollTop = 0;
           } else {
-            div.scrollTop += 1; // Scroll down
+            div.scrollTop += 1;
           }
         }
       }, 60);
@@ -86,15 +86,13 @@ function TaskTable() {
     }
     let updatedTasks;
     if (newTask.id) {
-      // Sửa công việc cũ
       updatedTasks = tasks.map(task => task.id === newTask.id ? newTask : task);
     } else {
-      // Thêm công việc mới
       updatedTasks = [...tasks, { ...newTask, id: Date.now().toString() }];
     }
     saveTasksToLocal(updatedTasks);
     setShow(false);
-    setNewTask({ id: null, date: '', content: '', dept: '', location: '', note: '' });
+    setNewTask({ id: null, date: '', content: '', dept: '', location: '' });
   };
 
   // Xoá task khỏi localStorage
@@ -115,7 +113,7 @@ function TaskTable() {
       rows.push(
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
-            <td colSpan={showActions ? 6 : 5} className="bg-light" style={{padding: '8px 14px'}}>
+            <td colSpan={showActions ? 5 : 4} className="bg-light" style={{padding: '8px 14px'}}>
               <div className="border-start border-4 border-primary ps-2 py-2 fw-bold text-primary bg-info-subtle fs-6">
                 {formatDateFull(date)}
               </div>
@@ -127,7 +125,6 @@ function TaskTable() {
               <td style={{ minWidth: 180 }}>{task.content}</td>
               <td style={{ minWidth: 120 }}>{task.dept}</td>
               <td style={{ minWidth: 120 }}>{task.location}</td>
-              <td style={{ minWidth: 120 }}>{task.note}</td>
               {showActions && (
                 <td style={{ minWidth: 100 }} className="text-nowrap">
                   <Button variant="warning" size="sm" className="me-1"
@@ -137,11 +134,6 @@ function TaskTable() {
               )}
             </tr>
           ))}
-          <tr>
-            <td colSpan={showActions ? 6 : 5} className="text-end fst-italic text-secondary" style={{background:'#f9f9f9'}}>
-              Tổng: {tasksByDate.length} công việc
-            </td>
-          </tr>
         </React.Fragment>
       );
     });
@@ -195,7 +187,6 @@ function TaskTable() {
               <th style={{ minWidth: 180 }}>Nội dung</th>
               <th style={{ minWidth: 120 }}>Người thực hiện</th>
               <th style={{ minWidth: 120 }}>Địa điểm</th>
-              <th style={{ minWidth: 120 }}>Ghi chú</th>
               {showActions && <th style={{ minWidth: 100 }}>Hành động</th>}
             </tr>
           </thead>
@@ -239,13 +230,6 @@ function TaskTable() {
               <Form.Control
                 value={newTask.location}
                 onChange={e => setNewTask({ ...newTask, location: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label>Ghi chú</Form.Label>
-              <Form.Control
-                value={newTask.note}
-                onChange={e => setNewTask({ ...newTask, note: e.target.value })}
               />
             </Form.Group>
           </Form>
