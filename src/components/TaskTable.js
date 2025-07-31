@@ -113,8 +113,8 @@ function TaskTable() {
       rows.push(
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
-            <td colSpan={showActions ? 5 : 4} className="bg-light" style={{padding: '8px 14px'}}>
-              <div className="border-start border-4 border-primary ps-2 py-2 fw-bold text-primary bg-info-subtle fs-6">
+            <td colSpan={showActions ? 5 : 4} className="bg-light" style={{padding: '8px 14px', fontWeight: 700, fontSize: 20, color: '#04375a', background: '#e9ecef'}}>
+              <div className="border-start border-4 border-primary ps-2 py-2">
                 {formatDateFull(date)}
               </div>
             </td>
@@ -142,8 +142,14 @@ function TaskTable() {
   };
 
   return (
-    <div>
-      <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap">
+    <div style={{
+      fontFamily: '"Times New Roman", Arial, Roboto, serif',
+      background: '#f8fafc',
+      padding: 0,
+      margin: 0,
+      minHeight: 'calc(100vh - 60px)'
+    }}>
+      <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{fontSize: 18}}>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(-1)}>
           <FaChevronLeft />
         </Button>
@@ -172,16 +178,26 @@ function TaskTable() {
           maxHeight: '65vh',
           overflowY: 'auto',
           overflowX: 'auto',
-          width: '100%',
-          maxWidth: '100vw',
-          margin: '0 auto',
-          boxShadow: '0 2px 8px #0001',
-          borderRadius: 10,
-          background: '#fff'
+          width: '100vw',
+          margin: '0',
+          borderRadius: 0,
+          background: '#fff',
+          fontFamily: '"Times New Roman", Arial, Roboto, serif',
+          fontSize: 18,
+          border: '1px solid #bbb',
         }}
       >
-        <table className="table table-bordered mb-0" style={{ minWidth: 900, fontSize: 15 }}>
-          <thead className="bg-white" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+        <table className="table table-bordered mb-0"
+          style={{
+            minWidth: 900,
+            fontSize: 18,
+            width: '100%',
+            margin: 0,
+            borderCollapse: 'collapse',
+            background: '#fff'
+          }}
+        >
+          <thead className="bg-white" style={{ position: 'sticky', top: 0, zIndex: 100, background: '#f2f5fa'}}>
             <tr>
               <th style={{ minWidth: 120 }}>Thời gian</th>
               <th style={{ minWidth: 180 }}>Nội dung</th>
@@ -197,7 +213,9 @@ function TaskTable() {
       {/* Modal thêm/sửa công việc */}
       <Modal show={show} onHide={() => setShow(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{newTask.id ? 'Cập nhật công việc' : 'Thêm công việc'}</Modal.Title>
+          <Modal.Title style={{fontFamily: '"Times New Roman", Arial, Roboto, serif'}}>{
+            newTask.id ? 'Cập nhật công việc' : 'Thêm công việc'
+          }</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
