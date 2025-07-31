@@ -2,6 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
+// Thêm Google Fonts cho Quicksand vào head nếu chưa có
+if (!document.getElementById('font-quicksand')) {
+  const link = document.createElement('link');
+  link.id = 'font-quicksand';
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap';
+  document.head.appendChild(link);
+}
+
 function TaskTable() {
   const [tasks, setTasks] = useState([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -12,15 +21,11 @@ function TaskTable() {
 
   const scrollRef = useRef(null);
 
-  // Load tasks from localStorage on mount
   useEffect(() => {
     const data = localStorage.getItem("tasks");
-    if (data) {
-      setTasks(JSON.parse(data));
-    }
+    if (data) setTasks(JSON.parse(data));
   }, []);
 
-  // Auto-scroll with infinite loop effect
   useEffect(() => {
     let interval;
     if (scrolling) {
@@ -30,15 +35,14 @@ function TaskTable() {
           if (div.scrollTop + div.clientHeight >= div.scrollHeight - 1) {
             div.scrollTop = 0;
           } else {
-            div.scrollTop += 1;
+            div.scrollTop += 2;
           }
         }
-      }, 60);
+      }, 40);
     }
     return () => clearInterval(interval);
   }, [scrolling]);
 
-  // Save tasks to localStorage helper
   const saveTasksToLocal = (newTasks) => {
     localStorage.setItem("tasks", JSON.stringify(newTasks));
     setTasks(newTasks);
@@ -66,7 +70,6 @@ function TaskTable() {
 
   const [start, end] = getWeekRange(currentWeek);
 
-  // Lọc tasks hiển thị theo tuần
   const filteredTasks = tasks.filter(task => {
     const taskDate = new Date(task.date);
     return taskDate >= start && taskDate <= end;
@@ -78,7 +81,6 @@ function TaskTable() {
     setCurrentWeek(newWeek);
   };
 
-  // Thêm/sửa task vào localStorage
   const handleSave = () => {
     if (!newTask.date || !newTask.content.trim()) {
       alert("Vui lòng nhập ngày và nội dung công việc.");
@@ -95,7 +97,6 @@ function TaskTable() {
     setNewTask({ id: null, date: '', content: '', dept: '', location: '' });
   };
 
-  // Xoá task khỏi localStorage
   const handleDelete = (id) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
     saveTasksToLocal(updatedTasks);
@@ -113,20 +114,25 @@ function TaskTable() {
       rows.push(
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
-            <td colSpan={showActions ? 5 : 4} className="bg-light" style={{padding: '8px 14px', fontWeight: 700, fontSize: 20, color: '#04375a', background: '#e9ecef'}}>
-              <div className="border-start border-4 border-primary ps-2 py-2">
-                {formatDateFull(date)}
-              </div>
+            <td colSpan={showActions ? 5 : 4} style={{
+              padding: '12px 16px',
+              fontWeight: 800,
+              fontSize: 28,
+              color: '#fff',
+              background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
+              fontFamily: "'Quicksand', Arial, sans-serif"
+            }}>
+              {formatDateFull(date)}
             </td>
           </tr>
           {tasksByDate.map(task => (
             <tr key={task.id}>
-              <td style={{ minWidth: 120 }}>{formatDateFull(task.date)}</td>
-              <td style={{ minWidth: 180 }}>{task.content}</td>
-              <td style={{ minWidth: 120 }}>{task.dept}</td>
-              <td style={{ minWidth: 120 }}>{task.location}</td>
+              <td style={{ minWidth: 140, fontSize: 22 }}>{formatDateFull(task.date)}</td>
+              <td style={{ minWidth: 260, fontSize: 22 }}>{task.content}</td>
+              <td style={{ minWidth: 160, fontSize: 22 }}>{task.dept}</td>
+              <td style={{ minWidth: 160, fontSize: 22 }}>{task.location}</td>
               {showActions && (
-                <td style={{ minWidth: 100 }} className="text-nowrap">
+                <td style={{ minWidth: 120 }} className="text-nowrap">
                   <Button variant="warning" size="sm" className="me-1"
                     onClick={() => { setNewTask(task); setShow(true); }}>Sửa</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDelete(task.id)}>Xoá</Button>
@@ -137,23 +143,22 @@ function TaskTable() {
         </React.Fragment>
       );
     });
-
     return rows;
   };
 
   return (
     <div style={{
-      fontFamily: '"Times New Roman", Arial, Roboto, serif',
-      background: '#f8fafc',
+      fontFamily: "'Quicksand', Arial, sans-serif",
+      background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
+      minHeight: '100vh',
       padding: 0,
       margin: 0,
-      minHeight: 'calc(100vh - 60px)'
     }}>
-      <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{fontSize: 18}}>
+      <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{ fontSize: 26 }}>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(-1)}>
           <FaChevronLeft />
         </Button>
-        <div className="fw-bold fs-5 text-dark">
+        <div className="fw-bold fs-4 text-dark">
           {formatDateVN(start)} - {formatDateVN(end)}
         </div>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(1)}>
@@ -179,31 +184,31 @@ function TaskTable() {
           overflowY: 'auto',
           overflowX: 'auto',
           width: '100vw',
-          margin: '0',
-          borderRadius: 0,
+          borderRadius: 20,
           background: '#fff',
-          fontFamily: '"Times New Roman", Arial, Roboto, serif',
-          fontSize: 18,
-          border: '1px solid #bbb',
+          fontFamily: "'Quicksand', Arial, sans-serif",
+          fontSize: 22,
+          border: '2px solid #1cb5e0',
+          boxShadow: '0 2px 20px #b6d0e2',
         }}
       >
         <table className="table table-bordered mb-0"
           style={{
-            minWidth: 900,
-            fontSize: 18,
+            minWidth: 1100,
+            fontSize: 22,
             width: '100%',
             margin: 0,
             borderCollapse: 'collapse',
             background: '#fff'
           }}
         >
-          <thead className="bg-white" style={{ position: 'sticky', top: 0, zIndex: 100, background: '#f2f5fa'}}>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 100, background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)', color: '#fff', fontSize: 24 }}>
             <tr>
-              <th style={{ minWidth: 120 }}>Thời gian</th>
-              <th style={{ minWidth: 180 }}>Nội dung</th>
-              <th style={{ minWidth: 120 }}>Người thực hiện</th>
-              <th style={{ minWidth: 120 }}>Địa điểm</th>
-              {showActions && <th style={{ minWidth: 100 }}>Hành động</th>}
+              <th style={{ minWidth: 140 }}>Thời gian</th>
+              <th style={{ minWidth: 260 }}>Nội dung</th>
+              <th style={{ minWidth: 160 }}>Người thực hiện</th>
+              <th style={{ minWidth: 160 }}>Địa điểm</th>
+              {showActions && <th style={{ minWidth: 120 }}>Hành động</th>}
             </tr>
           </thead>
           <tbody>{renderRows()}</tbody>
@@ -213,48 +218,52 @@ function TaskTable() {
       {/* Modal thêm/sửa công việc */}
       <Modal show={show} onHide={() => setShow(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title style={{fontFamily: '"Times New Roman", Arial, Roboto, serif'}}>{
-            newTask.id ? 'Cập nhật công việc' : 'Thêm công việc'
-          }</Modal.Title>
+          <Modal.Title style={{ fontFamily: "'Quicksand', Arial, sans-serif", fontSize: 26 }}>
+            {newTask.id ? 'Cập nhật công việc' : 'Thêm công việc'}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group className="mb-2">
-              <Form.Label>Ngày</Form.Label>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: 20 }}>Ngày</Form.Label>
               <Form.Control
                 type="date"
                 value={newTask.date}
+                style={{ fontSize: 20 }}
                 onChange={e => setNewTask({ ...newTask, date: e.target.value })}
               />
             </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label>Nội dung</Form.Label>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: 20 }}>Nội dung</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 value={newTask.content}
+                style={{ fontSize: 20 }}
                 onChange={e => setNewTask({ ...newTask, content: e.target.value })}
               />
             </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label>Người thực hiện</Form.Label>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: 20 }}>Người thực hiện</Form.Label>
               <Form.Control
                 value={newTask.dept}
+                style={{ fontSize: 20 }}
                 onChange={e => setNewTask({ ...newTask, dept: e.target.value })}
               />
             </Form.Group>
-            <Form.Group className="mb-2">
-              <Form.Label>Địa điểm</Form.Label>
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: 20 }}>Địa điểm</Form.Label>
               <Form.Control
                 value={newTask.location}
+                style={{ fontSize: 20 }}
                 onChange={e => setNewTask({ ...newTask, location: e.target.value })}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShow(false)}>Huỷ</Button>
-          <Button variant="primary" onClick={handleSave}>Lưu</Button>
+          <Button variant="secondary" onClick={() => setShow(false)} style={{ fontSize: 20 }}>Huỷ</Button>
+          <Button variant="primary" onClick={handleSave} style={{ fontSize: 20 }}>Lưu</Button>
         </Modal.Footer>
       </Modal>
     </div>
