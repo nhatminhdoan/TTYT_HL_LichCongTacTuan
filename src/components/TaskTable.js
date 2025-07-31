@@ -18,7 +18,6 @@ function TaskTable() {
   const [showActions, setShowActions] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [newTask, setNewTask] = useState({ id: null, date: '', content: '', dept: '', location: '' });
-
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -149,10 +148,14 @@ function TaskTable() {
   return (
     <div style={{
       fontFamily: "'Quicksand', Arial, sans-serif",
-      background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
       minHeight: '100vh',
       padding: 0,
       margin: 0,
+      // Nếu muốn nền cho toàn bộ trang thì dùng tại đây, nếu chỉ muốn nền cho bảng thì chuyển xuống style của table bên dưới
+      backgroundImage: 'url("/your-image-path.jpg")',
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
     }}>
       <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{ fontSize: 26 }}>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(-1)}>
@@ -185,11 +188,11 @@ function TaskTable() {
           overflowX: 'auto',
           width: '100vw',
           borderRadius: 20,
-          background: '#fff',
           fontFamily: "'Quicksand', Arial, sans-serif",
           fontSize: 22,
           border: '2px solid #1cb5e0',
           boxShadow: '0 2px 20px #b6d0e2',
+          background: 'transparent' // Để nền bảng trong suốt, nhìn thấy background image phía sau
         }}
       >
         <table className="table table-bordered mb-0"
@@ -199,10 +202,15 @@ function TaskTable() {
             width: '100%',
             margin: 0,
             borderCollapse: 'collapse',
-            background: '#fff'
+            background: 'rgba(255,255,255,0.82)', // Nền trắng mờ cho bảng, tạo cảm giác nổi trên nền hình
+            backdropFilter: 'blur(2px)'
           }}
         >
-          <thead style={{ position: 'sticky', top: 0, zIndex: 100, background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)', color: '#fff', fontSize: 24 }}>
+          <thead style={{
+            position: 'sticky', top: 0, zIndex: 100,
+            background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
+            color: '#fff', fontSize: 24
+          }}>
             <tr>
               <th style={{ minWidth: 140 }}>Thời gian</th>
               <th style={{ minWidth: 260 }}>Nội dung</th>
