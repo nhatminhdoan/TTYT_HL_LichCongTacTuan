@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
-// Google Fonts Quicksand
+// Nạp font Quicksand Google
 if (!document.getElementById('font-quicksand')) {
   const link = document.createElement('link');
   link.id = 'font-quicksand';
@@ -26,7 +26,7 @@ function TaskTable() {
     if (data) setTasks(JSON.parse(data));
   }, []);
 
-  // Auto-scroll for announcement
+  // Auto-scroll cho bảng thông báo
   useEffect(() => {
     let interval;
     if (scrolling) {
@@ -44,13 +44,13 @@ function TaskTable() {
     return () => clearInterval(interval);
   }, [scrolling]);
 
-  // Save tasks
+  // Lưu tasks
   const saveTasks = (newTasks) => {
     localStorage.setItem("tasks", JSON.stringify(newTasks));
     setTasks(newTasks);
   };
 
-  // Get week range
+  // Lấy khoảng tuần
   const getWeekRange = (date) => {
     const start = new Date(date);
     const day = start.getDay();
@@ -63,7 +63,7 @@ function TaskTable() {
     return [start, end];
   };
 
-  // Format date
+  // Format ngày
   const formatDateFull = (str) => new Date(str).toLocaleDateString('vi-VN', {
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
   });
@@ -73,20 +73,20 @@ function TaskTable() {
 
   const [start, end] = getWeekRange(currentWeek);
 
-  // Filter tasks in week
+  // Lọc tasks trong tuần
   const filteredTasks = tasks.filter(task => {
     const taskDate = new Date(task.date);
     return taskDate >= start && taskDate <= end;
   }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Next/prev week
+  // Chuyển tuần
   const handleChangeWeek = (delta) => {
     const newWeek = new Date(currentWeek);
     newWeek.setDate(newWeek.getDate() + delta * 7);
     setCurrentWeek(newWeek);
   };
 
-  // Save task
+  // Lưu task
   const handleSave = () => {
     if (!editTask.date || !editTask.content.trim()) {
       alert("Vui lòng nhập ngày và nội dung công việc.");
@@ -103,7 +103,7 @@ function TaskTable() {
     setEditTask({ id: null, date: '', content: '', dept: '', location: '' });
   };
 
-  // Delete task
+  // Xoá task
   const handleDelete = (id) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
     saveTasks(updatedTasks);
@@ -179,21 +179,24 @@ function TaskTable() {
         ref={scrollRef}
         id="task-table-scroll"
         style={{
-          maxHeight: '65vh',
-          overflowY: 'auto',
-          margin: '0 auto',
-          borderRadius: 18,
+          width: '100vw',
+          minWidth: '100vw',
+          maxWidth: '100vw',
+          margin: 0,
+          padding: 0,
+          borderRadius: 0,
           border: '2px solid #1cb5e0',
-          boxShadow: '0 2px 18px #a8e063',
-          background: 'rgba(255,255,255,0.90)',
-          width: '100%',
-          maxWidth: 1000 // Giới hạn bề ngang, tự động căn giữa
+          boxShadow: 'none',
+          position: 'relative',
+          overflowX: 'auto',
+          overflowY: 'auto',
+          background: 'rgba(255,255,255,0.90)'
         }}
       >
         <table className="table table-bordered mb-0"
           style={{
             width: '100%',
-            minWidth: 320,
+            minWidth: 700,
             fontSize: 18,
             margin: 0,
             borderCollapse: 'collapse',
@@ -207,10 +210,10 @@ function TaskTable() {
           }}>
             <tr>
               <th style={{ minWidth: 120 }}>Thời gian</th>
-              <th style={{ minWidth: 180 }}>Nội dung</th>
-              <th style={{ minWidth: 120 }}>Người thực hiện</th>
-              <th style={{ minWidth: 120 }}>Địa điểm</th>
-              {showActions && <th style={{ minWidth: 90 }}>Hành động</th>}
+              <th style={{ minWidth: 380 }}>Nội dung</th>
+              <th style={{ minWidth: 180 }}>Người thực hiện</th>
+              <th style={{ minWidth: 180 }}>Địa điểm</th>
+              {showActions && <th style={{ minWidth: 150 }}>Hành động</th>}
             </tr>
           </thead>
           <tbody>{renderRows()}</tbody>
@@ -266,13 +269,15 @@ function TaskTable() {
       <style>{`
         @media (max-width: 1100px) {
           #task-table-scroll {
-            max-width: 98vw !important;
+            max-width: 100vw !important;
+            min-width: 100vw !important;
+            width: 100vw !important;
           }
         }
         @media (max-width: 700px) {
           #task-table-scroll, .table {
             font-size: 15px !important;
-            min-width: 320px !important;
+            min-width: 700px !important;
           }
           .date-divider-cell {
             font-size: 19px !important;
@@ -289,6 +294,10 @@ function TaskTable() {
           color: #fff;
           background: linear-gradient(90deg,#43cea2 0%,#185a9d 100%);
           font-family: 'Quicksand', Arial, sans-serif;
+        }
+        body, #root {
+          padding: 0 !important;
+          margin: 0 !important;
         }
       `}</style>
     </div>
