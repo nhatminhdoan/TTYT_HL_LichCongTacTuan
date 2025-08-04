@@ -121,7 +121,7 @@ function TaskTable() {
       rows.push(
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
-            <td colSpan={showActions ? 5 : 4} className="date-divider-cell">
+            <td colSpan={showActions ? 5 : 4} className="date-divider-cell text-center">
               {formatDateFull(date)}
             </td>
           </tr>
@@ -152,7 +152,7 @@ function TaskTable() {
       minHeight: '100vh',
       padding: 0,
       margin: 0,
-      background: 'linear-gradient(120deg,#d4fc79 0%,#96e6a1 100%)'
+      background: 'none'
     }}>
       <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{ fontSize: 22 }}>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChangeWeek(-1)}>
@@ -190,7 +190,7 @@ function TaskTable() {
           position: 'relative',
           overflowX: 'auto',
           overflowY: 'auto',
-          background: 'rgba(255,255,255,0.90)'
+          background: 'none'
         }}
       >
         <table className="table table-bordered mb-0"
@@ -294,10 +294,12 @@ function TaskTable() {
           color: #fff;
           background: linear-gradient(90deg,#43cea2 0%,#185a9d 100%);
           font-family: 'Quicksand', Arial, sans-serif;
+          text-align: center !important;
         }
         body, #root {
           padding: 0 !important;
           margin: 0 !important;
+          background: none !important;
         }
       `}</style>
     </div>
