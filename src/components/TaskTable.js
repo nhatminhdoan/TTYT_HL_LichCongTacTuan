@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
-// Thêm Google Fonts cho Quicksand vào head nếu chưa có
+// Google Fonts Quicksand
 if (!document.getElementById('font-quicksand')) {
   const link = document.createElement('link');
   link.id = 'font-quicksand';
@@ -14,17 +14,19 @@ if (!document.getElementById('font-quicksand')) {
 function TaskTable() {
   const [tasks, setTasks] = useState([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [show, setShow] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [scrolling, setScrolling] = useState(false);
-  const [newTask, setNewTask] = useState({ id: null, date: '', content: '', dept: '', location: '' });
+  const [editTask, setEditTask] = useState({ id: null, date: '', content: '', dept: '', location: '' });
   const scrollRef = useRef(null);
 
+  // Load tasks from localStorage
   useEffect(() => {
     const data = localStorage.getItem("tasks");
     if (data) setTasks(JSON.parse(data));
   }, []);
 
+  // Auto-scroll for announcement
   useEffect(() => {
     let interval;
     if (scrolling) {
@@ -42,11 +44,13 @@ function TaskTable() {
     return () => clearInterval(interval);
   }, [scrolling]);
 
-  const saveTasksToLocal = (newTasks) => {
+  // Save tasks
+  const saveTasks = (newTasks) => {
     localStorage.setItem("tasks", JSON.stringify(newTasks));
     setTasks(newTasks);
   };
 
+  // Get week range
   const getWeekRange = (date) => {
     const start = new Date(date);
     const day = start.getDay();
@@ -59,81 +63,78 @@ function TaskTable() {
     return [start, end];
   };
 
+  // Format date
   const formatDateFull = (str) => new Date(str).toLocaleDateString('vi-VN', {
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
   });
-
   const formatDateVN = (date) => new Date(date).toLocaleDateString('vi-VN', {
     day: '2-digit', month: '2-digit', year: 'numeric'
   });
 
   const [start, end] = getWeekRange(currentWeek);
 
+  // Filter tasks in week
   const filteredTasks = tasks.filter(task => {
     const taskDate = new Date(task.date);
     return taskDate >= start && taskDate <= end;
   }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const handleChange = (delta) => {
+  // Next/prev week
+  const handleChangeWeek = (delta) => {
     const newWeek = new Date(currentWeek);
     newWeek.setDate(newWeek.getDate() + delta * 7);
     setCurrentWeek(newWeek);
   };
 
+  // Save task
   const handleSave = () => {
-    if (!newTask.date || !newTask.content.trim()) {
+    if (!editTask.date || !editTask.content.trim()) {
       alert("Vui lòng nhập ngày và nội dung công việc.");
       return;
     }
     let updatedTasks;
-    if (newTask.id) {
-      updatedTasks = tasks.map(task => task.id === newTask.id ? newTask : task);
+    if (editTask.id) {
+      updatedTasks = tasks.map(task => task.id === editTask.id ? editTask : task);
     } else {
-      updatedTasks = [...tasks, { ...newTask, id: Date.now().toString() }];
+      updatedTasks = [...tasks, { ...editTask, id: Date.now().toString() }];
     }
-    saveTasksToLocal(updatedTasks);
-    setShow(false);
-    setNewTask({ id: null, date: '', content: '', dept: '', location: '' });
+    saveTasks(updatedTasks);
+    setShowModal(false);
+    setEditTask({ id: null, date: '', content: '', dept: '', location: '' });
   };
 
+  // Delete task
   const handleDelete = (id) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
-    saveTasksToLocal(updatedTasks);
+    saveTasks(updatedTasks);
   };
 
+  // Render rows
   const renderRows = () => {
     const grouped = filteredTasks.reduce((acc, task) => {
       if (!acc[task.date]) acc[task.date] = [];
       acc[task.date].push(task);
       return acc;
     }, {});
-
     let rows = [];
     Object.entries(grouped).forEach(([date, tasksByDate]) => {
       rows.push(
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
-            <td colSpan={showActions ? 5 : 4} style={{
-              padding: '12px 16px',
-              fontWeight: 800,
-              fontSize: 28,
-              color: '#fff',
-              background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
-              fontFamily: "'Quicksand', Arial, sans-serif"
-            }}>
+            <td colSpan={showActions ? 5 : 4} className="date-divider-cell">
               {formatDateFull(date)}
             </td>
           </tr>
           {tasksByDate.map(task => (
             <tr key={task.id}>
-              <td style={{ minWidth: 140, fontSize: 22 }}>{formatDateFull(task.date)}</td>
-              <td style={{ minWidth: 260, fontSize: 22 }}>{task.content}</td>
-              <td style={{ minWidth: 160, fontSize: 22 }}>{task.dept}</td>
-              <td style={{ minWidth: 160, fontSize: 22 }}>{task.location}</td>
+              <td>{formatDateFull(task.date)}</td>
+              <td>{task.content}</td>
+              <td>{task.dept}</td>
+              <td>{task.location}</td>
               {showActions && (
-                <td style={{ minWidth: 120 }} className="text-nowrap">
+                <td>
                   <Button variant="warning" size="sm" className="me-1"
-                    onClick={() => { setNewTask(task); setShow(true); }}>Sửa</Button>
+                    onClick={() => { setEditTask(task); setShowModal(true); }}>Sửa</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDelete(task.id)}>Xoá</Button>
                 </td>
               )}
@@ -151,23 +152,19 @@ function TaskTable() {
       minHeight: '100vh',
       padding: 0,
       margin: 0,
-      // Nếu muốn nền cho toàn bộ trang thì dùng tại đây, nếu chỉ muốn nền cho bảng thì chuyển xuống style của table bên dưới
-      backgroundImage: 'url("/your-image-path.jpg")',
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
+      background: 'linear-gradient(120deg,#d4fc79 0%,#96e6a1 100%)'
     }}>
-      <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{ fontSize: 26 }}>
-        <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(-1)}>
+      <div className="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap" style={{ fontSize: 22 }}>
+        <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChangeWeek(-1)}>
           <FaChevronLeft />
         </Button>
         <div className="fw-bold fs-4 text-dark">
           {formatDateVN(start)} - {formatDateVN(end)}
         </div>
-        <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChange(1)}>
+        <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChangeWeek(1)}>
           <FaChevronRight />
         </Button>
-        <Button variant="success" className="rounded-circle shadow-sm" onClick={() => setShow(true)}>
+        <Button variant="success" className="rounded-circle shadow-sm" onClick={() => setShowModal(true)}>
           <FaPlus />
         </Button>
         <Button variant="info" className="rounded-circle shadow-sm" onClick={() => setScrolling(!scrolling)}>
@@ -178,102 +175,122 @@ function TaskTable() {
           {showActions ? "Ẩn" : "Hiện"}
         </Button>
       </div>
-
       <div
         ref={scrollRef}
         id="task-table-scroll"
         style={{
           maxHeight: '65vh',
           overflowY: 'auto',
-          overflowX: 'auto',
-          width: '100vw',
-          borderRadius: 20,
-          fontFamily: "'Quicksand', Arial, sans-serif",
-          fontSize: 22,
+          margin: '0 auto',
+          borderRadius: 18,
           border: '2px solid #1cb5e0',
-          boxShadow: '0 2px 20px #b6d0e2',
-          background: 'transparent' // Để nền bảng trong suốt, nhìn thấy background image phía sau
+          boxShadow: '0 2px 18px #a8e063',
+          background: 'rgba(255,255,255,0.90)',
+          width: '100%',
+          maxWidth: 1000 // Giới hạn bề ngang, tự động căn giữa
         }}
       >
         <table className="table table-bordered mb-0"
           style={{
-            minWidth: 1100,
-            fontSize: 22,
             width: '100%',
+            minWidth: 320,
+            fontSize: 18,
             margin: 0,
             borderCollapse: 'collapse',
-            background: 'rgba(255,255,255,0.82)', // Nền trắng mờ cho bảng, tạo cảm giác nổi trên nền hình
-            backdropFilter: 'blur(2px)'
+            background: 'transparent'
           }}
         >
           <thead style={{
             position: 'sticky', top: 0, zIndex: 100,
             background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
-            color: '#fff', fontSize: 24
+            color: '#fff', fontSize: 20
           }}>
             <tr>
-              <th style={{ minWidth: 140 }}>Thời gian</th>
-              <th style={{ minWidth: 260 }}>Nội dung</th>
-              <th style={{ minWidth: 160 }}>Người thực hiện</th>
-              <th style={{ minWidth: 160 }}>Địa điểm</th>
-              {showActions && <th style={{ minWidth: 120 }}>Hành động</th>}
+              <th style={{ minWidth: 120 }}>Thời gian</th>
+              <th style={{ minWidth: 180 }}>Nội dung</th>
+              <th style={{ minWidth: 120 }}>Người thực hiện</th>
+              <th style={{ minWidth: 120 }}>Địa điểm</th>
+              {showActions && <th style={{ minWidth: 90 }}>Hành động</th>}
             </tr>
           </thead>
           <tbody>{renderRows()}</tbody>
         </table>
       </div>
-
       {/* Modal thêm/sửa công việc */}
-      <Modal show={show} onHide={() => setShow(false)} centered>
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title style={{ fontFamily: "'Quicksand', Arial, sans-serif", fontSize: 26 }}>
-            {newTask.id ? 'Cập nhật công việc' : 'Thêm công việc'}
+          <Modal.Title style={{ fontFamily: "'Quicksand', Arial, sans-serif", fontSize: 22 }}>
+            {editTask.id ? 'Cập nhật công việc' : 'Thêm công việc'}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label style={{ fontSize: 20 }}>Ngày</Form.Label>
+              <Form.Label>Ngày</Form.Label>
               <Form.Control
                 type="date"
-                value={newTask.date}
-                style={{ fontSize: 20 }}
-                onChange={e => setNewTask({ ...newTask, date: e.target.value })}
+                value={editTask.date}
+                onChange={e => setEditTask({ ...editTask, date: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label style={{ fontSize: 20 }}>Nội dung</Form.Label>
+              <Form.Label>Nội dung</Form.Label>
               <Form.Control
                 as="textarea"
-                rows={3}
-                value={newTask.content}
-                style={{ fontSize: 20 }}
-                onChange={e => setNewTask({ ...newTask, content: e.target.value })}
+                rows={2}
+                value={editTask.content}
+                onChange={e => setEditTask({ ...editTask, content: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label style={{ fontSize: 20 }}>Người thực hiện</Form.Label>
+              <Form.Label>Người thực hiện</Form.Label>
               <Form.Control
-                value={newTask.dept}
-                style={{ fontSize: 20 }}
-                onChange={e => setNewTask({ ...newTask, dept: e.target.value })}
+                value={editTask.dept}
+                onChange={e => setEditTask({ ...editTask, dept: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label style={{ fontSize: 20 }}>Địa điểm</Form.Label>
+              <Form.Label>Địa điểm</Form.Label>
               <Form.Control
-                value={newTask.location}
-                style={{ fontSize: 20 }}
-                onChange={e => setNewTask({ ...newTask, location: e.target.value })}
+                value={editTask.location}
+                onChange={e => setEditTask({ ...editTask, location: e.target.value })}
               />
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShow(false)} style={{ fontSize: 20 }}>Huỷ</Button>
-          <Button variant="primary" onClick={handleSave} style={{ fontSize: 20 }}>Lưu</Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Huỷ</Button>
+          <Button variant="primary" onClick={handleSave}>Lưu</Button>
         </Modal.Footer>
       </Modal>
+      <style>{`
+        @media (max-width: 1100px) {
+          #task-table-scroll {
+            max-width: 98vw !important;
+          }
+        }
+        @media (max-width: 700px) {
+          #task-table-scroll, .table {
+            font-size: 15px !important;
+            min-width: 320px !important;
+          }
+          .date-divider-cell {
+            font-size: 19px !important;
+            padding: 8px 5px !important;
+          }
+          .table th, .table td {
+            padding: 8px 5px !important;
+          }
+        }
+        .date-divider-cell {
+          padding: 10px 16px;
+          font-weight: 800;
+          font-size: 23px;
+          color: #fff;
+          background: linear-gradient(90deg,#43cea2 0%,#185a9d 100%);
+          font-family: 'Quicksand', Arial, sans-serif;
+        }
+      `}</style>
     </div>
   );
 }
