@@ -248,7 +248,7 @@ function TaskTable() {
                 <option value="">Chọn buổi</option>
                 <option value="Sáng">Sáng</option>
                 <option value="Chiều">Chiều</option>
-                <option value="Tối">Tối</option>
+                <option value="Cả ngày">Cả ngày</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
