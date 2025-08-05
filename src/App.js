@@ -7,26 +7,28 @@ import logo from './logo.jpeg';
 function App() {
   return (
     <div className="container py-4">
-      {/* Header: căn theo chiều ngang bảng */}
-      <div className="mb-4 w-100" style={{maxWidth: 1000, margin: "0 auto"}}>
-        <div className="row align-items-center" style={{ minHeight: 130 }}>
-          {/* Logo bên trái, to hơn */}
-          <div className="col-auto">
-            <img src={logo} alt="Logo" height={120} style={{display: "block"}} />
-          </div>
-          {/* Tiêu đề căn giữa */}
-          <div className="col text-center">
-            <h1 className="text-danger m-0" style={{ fontSize: "2.7rem" }}>
-              LỊCH CÔNG TÁC TUẦN
-            </h1>
-          </div>
-          {/* Cột trống để cân đối tiêu đề */}
-          <div className="col-auto"></div>
-        </div>
-      </div>
+      {/* Container chính căn giữa */}
+      <div className="d-flex flex-column align-items-center" style={{ maxWidth: 1000, margin: "0 auto", position: "relative" }}>
+        {/* Logo ở góc trái */}
+        <img 
+          src={logo} 
+          alt="Logo" 
+          height={120} 
+          style={{ 
+            position: "absolute", 
+            top: -10, 
+            left: -300 
+          }} 
+        />
 
-      {/* Bảng công việc */}
-      <div style={{maxWidth: 1000, margin: "0 auto"}}>
+        {/* Tiêu đề */}
+        <div className="mb-4 w-100">
+          <h1 className="text-danger m-0 text-center" style={{ fontSize: "2.7rem" }}>
+            LỊCH CÔNG TÁC TUẦN
+          </h1>
+        </div>
+
+        {/* Bảng công việc */}
         <TaskTable />
       </div>
     </div>
