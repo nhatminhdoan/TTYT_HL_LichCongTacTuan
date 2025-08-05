@@ -39,7 +39,7 @@ function TaskTable() {
             div.scrollTop += 2;
           }
         }
-      }, 40);
+      }, 240);
     }
     return () => clearInterval(interval);
   }, [scrolling]);
