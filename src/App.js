@@ -17,7 +17,7 @@ function App() {
           style={{ 
             position: "absolute", 
             top: -10, 
-            left: -300 
+            left: -200 
           }} 
         />
 
