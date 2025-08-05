@@ -194,7 +194,7 @@ function TaskTable() {
           overflowX: 'auto',
           overflowY: 'auto',
           background: 'none',
-          maxHeight: '750px'
+          maxHeight: '678px'
         }}
       >
         <table className="table table-bordered mb-0"
