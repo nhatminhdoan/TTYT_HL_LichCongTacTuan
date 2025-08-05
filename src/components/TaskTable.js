@@ -17,13 +17,22 @@ function TaskTable() {
   const [showModal, setShowModal] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [scrolling, setScrolling] = useState(false);
-  const [editTask, setEditTask] = useState({ id: null, date: '', content: '', dept: '', location: '' });
+  const [editTask, setEditTask] = useState({ id: null, date: '', session: '', time: '', content: '', dept: '', location: '' });
   const scrollRef = useRef(null);
 
-  // Load tasks from localStorage
+  // Load tasks từ localStorage
   useEffect(() => {
     const data = localStorage.getItem("tasks");
-    if (data) setTasks(JSON.parse(data));
+    try {
+      const parsedData = JSON.parse(data);
+      if (Array.isArray(parsedData)) {
+        setTasks(parsedData);
+      } else {
+        setTasks([]); // Nếu dữ liệu không phải là mảng, khởi tạo mảng rỗng
+      }
+    } catch (error) {
+      setTasks([]); // Nếu JSON.parse thất bại, khởi tạo mảng rỗng
+    }
   }, []);
 
   // Auto-scroll cho bảng thông báo
@@ -39,7 +48,7 @@ function TaskTable() {
             div.scrollTop += 2;
           }
         }
-      }, 240);
+      }, 120);
     }
     return () => clearInterval(interval);
   }, [scrolling]);
@@ -63,21 +72,15 @@ function TaskTable() {
     return [start, end];
   };
 
-  // Format ngày
-  const formatDateFull = (str) => new Date(str).toLocaleDateString('vi-VN', {
-    weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
-  });
-  const formatDateVN = (date) => new Date(date).toLocaleDateString('vi-VN', {
-    day: '2-digit', month: '2-digit', year: 'numeric'
-  });
-
   const [start, end] = getWeekRange(currentWeek);
 
   // Lọc tasks trong tuần
-  const filteredTasks = tasks.filter(task => {
-    const taskDate = new Date(task.date);
-    return taskDate >= start && taskDate <= end;
-  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const filteredTasks = Array.isArray(tasks)
+    ? tasks.filter(task => {
+        const taskDate = new Date(task.date);
+        return taskDate >= start && taskDate <= end;
+      }).sort((a, b) => new Date(a.date) - new Date(b.date))
+    : [];
 
   // Chuyển tuần
   const handleChangeWeek = (delta) => {
@@ -88,19 +91,19 @@ function TaskTable() {
 
   // Lưu task
   const handleSave = () => {
-    if (!editTask.date || !editTask.content.trim()) {
-      alert("Vui lòng nhập ngày và nội dung công việc.");
+    if (!editTask.date || !editTask.session || !editTask.time || !editTask.content.trim()) {
+      alert("Vui lòng nhập đầy đủ thông tin công việc.");
       return;
     }
-    let updatedTasks;
+    let updatedTasks = Array.isArray(tasks) ? tasks : []; // Đảm bảo tasks là một mảng
     if (editTask.id) {
-      updatedTasks = tasks.map(task => task.id === editTask.id ? editTask : task);
+      updatedTasks = updatedTasks.map(task => task.id === editTask.id ? editTask : task);
     } else {
-      updatedTasks = [...tasks, { ...editTask, id: Date.now().toString() }];
+      updatedTasks = [...updatedTasks, { ...editTask, id: Date.now().toString() }];
     }
     saveTasks(updatedTasks);
     setShowModal(false);
-    setEditTask({ id: null, date: '', content: '', dept: '', location: '' });
+    setEditTask({ id: null, date: '', session: '', time: '', content: '', dept: '', location: '' });
   };
 
   // Xoá task
@@ -122,12 +125,12 @@ function TaskTable() {
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
             <td colSpan={showActions ? 5 : 4} className="date-divider-cell text-center">
-              {formatDateFull(date)}
+              {date}
             </td>
           </tr>
           {tasksByDate.map(task => (
             <tr key={task.id}>
-              <td>{formatDateFull(task.date)}</td>
+              <td>{`${task.session} - ${task.time}`}</td>
               <td>{task.content}</td>
               <td>{task.dept}</td>
               <td>{task.location}</td>
@@ -159,7 +162,7 @@ function TaskTable() {
           <FaChevronLeft />
         </Button>
         <div className="fw-bold fs-4 text-dark">
-          {formatDateVN(start)} - {formatDateVN(end)}
+          {start.toLocaleDateString('vi-VN')} - {end.toLocaleDateString('vi-VN')}
         </div>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChangeWeek(1)}>
           <FaChevronRight />
@@ -191,14 +194,14 @@ function TaskTable() {
           overflowX: 'auto',
           overflowY: 'auto',
           background: 'none',
-          maxHeight: '450px' // Giới hạn chiều cao để tạo thanh cuộn dọc
+          maxHeight: '750px'
         }}
       >
         <table className="table table-bordered mb-0"
           style={{
             width: '100%',
             minWidth: 700,
-            fontSize: 18,
+            fontSize: 33,
             margin: 0,
             borderCollapse: 'collapse',
             background: 'transparent'
@@ -220,7 +223,6 @@ function TaskTable() {
           <tbody>{renderRows()}</tbody>
         </table>
       </div>
-      {/* Modal thêm/sửa công việc */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title style={{ fontFamily: "'Quicksand', Arial, sans-serif", fontSize: 22 }}>
@@ -235,6 +237,26 @@ function TaskTable() {
                 type="date"
                 value={editTask.date}
                 onChange={e => setEditTask({ ...editTask, date: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Buổi</Form.Label>
+              <Form.Select
+                value={editTask.session}
+                onChange={e => setEditTask({ ...editTask, session: e.target.value })}
+              >
+                <option value="">Chọn buổi</option>
+                <option value="Sáng">Sáng</option>
+                <option value="Chiều">Chiều</option>
+                <option value="Tối">Tối</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Giờ</Form.Label>
+              <Form.Control
+                type="time"
+                value={editTask.time}
+                onChange={e => setEditTask({ ...editTask, time: e.target.value })}
               />
             </Form.Group>
             <Form.Group className="mb-3">
