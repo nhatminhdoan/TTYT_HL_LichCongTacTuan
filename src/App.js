@@ -7,26 +7,28 @@ import logo from './logo.jpeg';
 function App() {
   return (
     <div className="container py-4">
-      {/* Header: Logo bên trái, tiêu đề ở giữa, ngang hàng */}
-      <div className="mb-4 w-100">
-        <div className="row align-items-center" style={{ minHeight: 100 }}>
-          {/* Logo bên trái */}
+      {/* Header: căn theo chiều ngang bảng */}
+      <div className="mb-4 w-100" style={{maxWidth: 1000, margin: "0 auto"}}>
+        <div className="row align-items-center" style={{ minHeight: 130 }}>
+          {/* Logo bên trái, to hơn */}
           <div className="col-auto">
-            <img src={logo} alt="Logo" height={80} />
+            <img src={logo} alt="Logo" height={120} style={{display: "block"}} />
           </div>
           {/* Tiêu đề căn giữa */}
           <div className="col text-center">
-            <h1 className="text-danger m-0" style={{ fontSize: "2.5rem" }}>
+            <h1 className="text-danger m-0" style={{ fontSize: "2.7rem" }}>
               LỊCH CÔNG TÁC TUẦN
             </h1>
           </div>
-          {/* Cột trống để căn giữa tiêu đề nếu muốn cân đối hai bên */}
+          {/* Cột trống để cân đối tiêu đề */}
           <div className="col-auto"></div>
         </div>
       </div>
 
       {/* Bảng công việc */}
-      <TaskTable />
+      <div style={{maxWidth: 1000, margin: "0 auto"}}>
+        <TaskTable />
+      </div>
     </div>
   );
 }
