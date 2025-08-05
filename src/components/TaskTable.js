@@ -190,7 +190,8 @@ function TaskTable() {
           position: 'relative',
           overflowX: 'auto',
           overflowY: 'auto',
-          background: 'none'
+          background: 'none',
+          maxHeight: '450px' // Giới hạn chiều cao để tạo thanh cuộn dọc
         }}
       >
         <table className="table table-bordered mb-0"
