@@ -11,6 +11,35 @@ if (!document.getElementById('font-quicksand')) {
   document.head.appendChild(link);
 }
 
+// Hàm lấy thứ trong tuần bằng tiếng Việt
+function getVietnameseDay(dateString) {
+  const days = [
+    "Chủ Nhật",
+    "Thứ Hai",
+    "Thứ Ba",
+    "Thứ Tư",
+    "Thứ Năm",
+    "Thứ Sáu",
+    "Thứ Bảy"
+  ];
+  try {
+    const date = new Date(dateString);
+    return days[date.getDay()];
+  } catch {
+    return "";
+  }
+}
+
+// Định dạng ngày tháng năm dd/mm/yyyy
+function formatDateVN(dateString) {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  } catch {
+    return dateString;
+  }
+}
+
 function TaskTable() {
   const [tasks, setTasks] = useState([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -18,31 +47,39 @@ function TaskTable() {
   const [showActions, setShowActions] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [editTask, setEditTask] = useState({ id: null, date: '', session: '', time: '', content: '', dept: '', location: '' });
+  const [weekNote, setWeekNote] = useState("");
   const scrollRef = useRef(null);
 
-  // Load tasks từ localStorage
+  // Load tasks và ghi chú từ localStorage
   useEffect(() => {
     const data = localStorage.getItem("tasks");
+    const note = localStorage.getItem("weekNote");
     try {
       const parsedData = JSON.parse(data);
       if (Array.isArray(parsedData)) {
         setTasks(parsedData);
       } else {
-        setTasks([]); // Nếu dữ liệu không phải là mảng, khởi tạo mảng rỗng
+        setTasks([]);
       }
-    } catch (error) {
-      setTasks([]); // Nếu JSON.parse thất bại, khởi tạo mảng rỗng
+    } catch {
+      setTasks([]);
     }
+    setWeekNote(note || "");
   }, []);
 
-  // Auto-scroll cho bảng thông báo
+  // Tự động lưu ghi chú mỗi lần thay đổi
+  useEffect(() => {
+    localStorage.setItem("weekNote", weekNote);
+  }, [weekNote]);
+
+  // Auto-scroll bảng (Đã fix bug)
   useEffect(() => {
     let interval;
     if (scrolling) {
       interval = setInterval(() => {
         const div = scrollRef.current;
         if (div) {
-          if (div.scrollTop + div.clientHeight >= div.scrollHeight - 1) {
+          if (Math.abs(div.scrollTop + div.clientHeight - div.scrollHeight) < 2) {
             div.scrollTop = 0;
           } else {
             div.scrollTop += 2;
@@ -51,7 +88,7 @@ function TaskTable() {
       }, 120);
     }
     return () => clearInterval(interval);
-  }, [scrolling]);
+  }, [scrolling, tasks]);
 
   // Lưu tasks
   const saveTasks = (newTasks) => {
@@ -95,7 +132,7 @@ function TaskTable() {
       alert("Vui lòng nhập đầy đủ thông tin công việc.");
       return;
     }
-    let updatedTasks = Array.isArray(tasks) ? tasks : []; // Đảm bảo tasks là một mảng
+    let updatedTasks = Array.isArray(tasks) ? tasks : [];
     if (editTask.id) {
       updatedTasks = updatedTasks.map(task => task.id === editTask.id ? editTask : task);
     } else {
@@ -112,7 +149,7 @@ function TaskTable() {
     saveTasks(updatedTasks);
   };
 
-  // Render rows
+  // Render rows, nhóm theo ngày, hiển thị ngày/thứ
   const renderRows = () => {
     const grouped = filteredTasks.reduce((acc, task) => {
       if (!acc[task.date]) acc[task.date] = [];
@@ -125,7 +162,7 @@ function TaskTable() {
         <React.Fragment key={`group-${date}`}>
           <tr className="date-divider-row">
             <td colSpan={showActions ? 5 : 4} className="date-divider-cell text-center">
-              {date}
+              {formatDateVN(date)} ({getVietnameseDay(date)})
             </td>
           </tr>
           {tasksByDate.map(task => (
@@ -162,7 +199,7 @@ function TaskTable() {
           <FaChevronLeft />
         </Button>
         <div className="fw-bold fs-4 text-dark">
-          {start.toLocaleDateString('vi-VN')} - {end.toLocaleDateString('vi-VN')}
+          {formatDateVN(start)} - {formatDateVN(end)}
         </div>
         <Button variant="outline-primary" className="rounded-circle shadow-sm" onClick={() => handleChangeWeek(1)}>
           <FaChevronRight />
@@ -194,7 +231,7 @@ function TaskTable() {
           overflowX: 'auto',
           overflowY: 'auto',
           background: 'none',
-          maxHeight: '678px'
+          maxHeight: '600px'
         }}
       >
         <table className="table table-bordered mb-0"
@@ -222,6 +259,43 @@ function TaskTable() {
           </thead>
           <tbody>{renderRows()}</tbody>
         </table>
+      </div>
+      {/* Hàng ghi chú tuần sau: nền trắng, không viền, không ô */}
+      <div
+        style={{
+          margin: "18px 0 0 0",
+          padding: "8px 0 8px 0",
+          background: "#fff",
+          borderRadius: "0",
+          border: "none",
+          maxWidth: 900,
+          fontSize: 30,
+          fontWeight: 500
+        }}
+      >
+        <span style={{fontWeight: 700, marginRight: 12}}>Ghi chú:</span>
+        <span style={{
+          fontSize: 19,
+          fontFamily: "'Quicksand', Times New Roman, sans-serif",
+          minHeight: "28px",
+          display: "inline-block",
+          verticalAlign: "middle"
+        }}>
+          <span
+            contentEditable
+            suppressContentEditableWarning
+            style={{
+              outline: "none",
+              padding: "3px 8px",
+              minWidth: "220px",
+              borderRadius: "6px",
+              background: "#fff",
+              border: "1px dashed #eee"
+            }}
+            onBlur={e => setWeekNote(e.target.innerText)}
+            onInput={e => setWeekNote(e.currentTarget.innerText)}
+          >{weekNote}</span>
+        </span>
       </div>
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
