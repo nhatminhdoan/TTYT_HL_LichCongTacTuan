@@ -2,14 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaArrowDown } from 'react-icons/fa';
 
-// Nạp font Quicksand Google
-if (!document.getElementById('font-quicksand')) {
-  const link = document.createElement('link');
-  link.id = 'font-quicksand';
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap';
-  document.head.appendChild(link);
-}
+// Font Times New Roman đã có sẵn trong hệ thống
 
 // Hàm lấy thứ trong tuần bằng tiếng Việt
 function getVietnameseDay(dateString) {
@@ -47,13 +40,13 @@ function TaskTable() {
   const [showActions, setShowActions] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [editTask, setEditTask] = useState({ id: null, date: '', session: '', time: '', content: '', dept: '', location: '' });
-  const [weekNote, setWeekNote] = useState("");
+  const [weekNotes, setWeekNotes] = useState({});
   const scrollRef = useRef(null);
 
   // Load tasks và ghi chú từ localStorage
   useEffect(() => {
     const data = localStorage.getItem("tasks");
-    const note = localStorage.getItem("weekNote");
+    const notes = localStorage.getItem("weekNotes");
     try {
       const parsedData = JSON.parse(data);
       if (Array.isArray(parsedData)) {
@@ -64,13 +57,22 @@ function TaskTable() {
     } catch {
       setTasks([]);
     }
-    setWeekNote(note || "");
+    try {
+      const parsedNotes = JSON.parse(notes);
+      if (parsedNotes && typeof parsedNotes === 'object') {
+        setWeekNotes(parsedNotes);
+      } else {
+        setWeekNotes({});
+      }
+    } catch {
+      setWeekNotes({});
+    }
   }, []);
 
   // Tự động lưu ghi chú mỗi lần thay đổi
   useEffect(() => {
-    localStorage.setItem("weekNote", weekNote);
-  }, [weekNote]);
+    localStorage.setItem("weekNotes", JSON.stringify(weekNotes));
+  }, [weekNotes]);
 
   // Auto-scroll bảng (Đã fix bug)
   useEffect(() => {
@@ -109,7 +111,13 @@ function TaskTable() {
     return [start, end];
   };
 
+  // Tạo key cho tuần hiện tại
+  const getWeekKey = (startDate) => {
+    return startDate.toISOString().split('T')[0];
+  };
+
   const [start, end] = getWeekRange(currentWeek);
+  const currentWeekKey = getWeekKey(start);
 
   // Lọc tasks trong tuần
   const filteredTasks = Array.isArray(tasks)
@@ -188,7 +196,7 @@ function TaskTable() {
 
   return (
     <div style={{
-      fontFamily: "'Quicksand', Arial, sans-serif",
+      fontFamily: "'Times New Roman', Times, serif",
       minHeight: '100vh',
       padding: 0,
       margin: 0,
@@ -231,7 +239,7 @@ function TaskTable() {
           overflowX: 'auto',
           overflowY: 'auto',
           background: 'none',
-          maxHeight: '600px'
+          maxHeight: '500px'
         }}
       >
         <table className="table table-bordered mb-0"
@@ -247,7 +255,7 @@ function TaskTable() {
           <thead style={{
             position: 'sticky', top: 0, zIndex: 100,
             background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
-            color: '#fff', fontSize: 20
+            color: '#fff', fontSize: 33
           }}>
             <tr>
               <th style={{ minWidth: 120 }}>Thời gian</th>
@@ -260,46 +268,84 @@ function TaskTable() {
           <tbody>{renderRows()}</tbody>
         </table>
       </div>
-      {/* Hàng ghi chú tuần sau: nền trắng, không viền, không ô */}
+      {/* Phần ghi chú tuần - thiết kế mới */}
       <div
         style={{
-          margin: "18px 0 0 0",
-          padding: "8px 0 8px 0",
-          background: "#fff",
-          borderRadius: "0",
-          border: "none",
+          margin: "25px auto 0 auto",
+          padding: "20px 25px",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          borderRadius: "15px",
           maxWidth: 900,
-          fontSize: 30,
-          fontWeight: 500
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          border: "1px solid rgba(255,255,255,0.2)"
         }}
       >
-        <span style={{fontWeight: 700, marginRight: 12}}>Ghi chú:</span>
-        <span style={{
-          fontSize: 19,
-          fontFamily: "'Quicksand', Times New Roman, sans-serif",
-          minHeight: "28px",
-          display: "inline-block",
-          verticalAlign: "middle"
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          marginBottom: "15px"
         }}>
-          <span
-            contentEditable
-            suppressContentEditableWarning
-            style={{
-              outline: "none",
-              padding: "3px 8px",
-              minWidth: "220px",
-              borderRadius: "6px",
-              background: "#fff",
-              border: "1px dashed #eee"
-            }}
-            onBlur={e => setWeekNote(e.target.innerText)}
-            onInput={e => setWeekNote(e.currentTarget.innerText)}
-          >{weekNote}</span>
-        </span>
+          <span style={{
+            fontSize: 24,
+            fontWeight: 700,
+            color: "#fff",
+            marginRight: "15px",
+            textShadow: "0 2px 4px rgba(0,0,0,0.3)"
+          }}>📝 Ghi chú</span>
+          <span style={{
+            fontSize: 18,
+            color: "rgba(255,255,255,0.9)",
+            fontStyle: "italic"
+          }}>
+          </span>
+        </div>
+        <div
+          contentEditable
+          suppressContentEditableWarning
+          style={{
+            outline: "none",
+            padding: "15px 20px",
+            minHeight: "60px",
+            borderRadius: "12px",
+            background: "rgba(255,255,255,0.95)",
+            border: "2px solid rgba(255,255,255,0.3)",
+            fontSize: 18,
+            fontFamily: "'Times New Roman', Times, serif",
+            lineHeight: "1.5",
+            color: "#333",
+            boxShadow: "inset 0 2px 8px rgba(0,0,0,0.1)",
+            transition: "all 0.3s ease"
+          }}
+          onBlur={e => {
+            const newNotes = { ...weekNotes };
+            newNotes[currentWeekKey] = e.target.innerText;
+            setWeekNotes(newNotes);
+          }}
+          onInput={e => {
+            const newNotes = { ...weekNotes };
+            newNotes[currentWeekKey] = e.currentTarget.innerText;
+            setWeekNotes(newNotes);
+          }}
+          onFocus={e => {
+            e.target.style.background = "rgba(255,255,255,1)";
+            e.target.style.border = "2px solid rgba(255,255,255,0.8)";
+            e.target.style.boxShadow = "inset 0 2px 8px rgba(0,0,0,0.1), 0 0 20px rgba(255,255,255,0.3)";
+          }}
+        >
+          {weekNotes[currentWeekKey] || ""}
+        </div>
+        <div style={{
+          marginTop: "12px",
+          fontSize: 14,
+          color: "rgba(255,255,255,0.8)",
+          fontStyle: "italic"
+        }}>
+          💡 Nhấp vào ô ghi chú để chỉnh sửa. Ghi chú sẽ được lưu tự động cho từng tuần.
+        </div>
       </div>
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title style={{ fontFamily: "'Quicksand', Arial, sans-serif", fontSize: 22 }}>
+          <Modal.Title style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: 22 }}>
             {editTask.id ? 'Cập nhật công việc' : 'Thêm công việc'}
           </Modal.Title>
         </Modal.Header>
@@ -390,7 +436,7 @@ function TaskTable() {
           font-size: 23px;
           color: #fff;
           background: linear-gradient(90deg,#43cea2 0%,#185a9d 100%);
-          font-family: 'Quicksand', Arial, sans-serif;
+          font-family: 'Times New Roman', Times, serif;
           text-align: center !important;
         }
         body, #root {
