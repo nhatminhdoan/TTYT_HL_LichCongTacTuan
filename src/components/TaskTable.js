@@ -244,7 +244,7 @@ function TaskTable() {
             overflowX: 'auto',
             overflowY: 'hidden',
             background: 'none',
-            maxHeight: showNotes ? '580px' : '640px',
+            maxHeight: showNotes ? '550px' : '600px',
             transition: 'max-height 0.3s ease'
           }}
         >
@@ -316,9 +316,13 @@ function TaskTable() {
             </div>
           </div>
           
-          <div
-            contentEditable
-            suppressContentEditableWarning
+          <textarea
+            value={weekNotes[currentWeekKey] || ""}
+            onChange={e => {
+              const newNotes = { ...weekNotes };
+              newNotes[currentWeekKey] = e.target.value;
+              setWeekNotes(newNotes);
+            }}
             style={{
               outline: "none",
               padding: "10px 12px",
@@ -332,25 +336,19 @@ function TaskTable() {
               lineHeight: "1.3",
               color: "#495057",
               transition: "border-color 0.2s ease",
-              overflowY: "auto"
-            }}
-            onBlur={e => {
-              const newNotes = { ...weekNotes };
-              newNotes[currentWeekKey] = e.target.innerText;
-              setWeekNotes(newNotes);
-            }}
-            onInput={e => {
-              const newNotes = { ...weekNotes };
-              newNotes[currentWeekKey] = e.target.innerText;
-              setWeekNotes(newNotes);
+              overflowY: "auto",
+              resize: "none",
+              width: "100%",
+              boxSizing: "border-box"
             }}
             onFocus={e => {
               e.target.style.border = "2px solid #007bff";
             }}
-            placeholder="Nhập ghi chú..."
-          >
-            {weekNotes[currentWeekKey] || ""}
-          </div>
+            onBlur={e => {
+              e.target.style.border = "1px solid #ced4da";
+            }}
+            placeholder="Nhập ghi chú cho tuần này..."
+          />
         </div>
       )}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
