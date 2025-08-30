@@ -41,6 +41,7 @@ function TaskTable() {
   const [scrolling, setScrolling] = useState(false);
   const [editTask, setEditTask] = useState({ id: null, date: '', session: '', time: '', content: '', dept: '', location: '' });
   const [weekNotes, setWeekNotes] = useState({});
+  const [showNotes, setShowNotes] = useState(false);
   const scrollRef = useRef(null);
 
   // Load tasks và ghi chú từ localStorage
@@ -136,8 +137,8 @@ function TaskTable() {
 
   // Lưu task
   const handleSave = () => {
-    if (!editTask.date || !editTask.session || !editTask.time || !editTask.content.trim()) {
-      alert("Vui lòng nhập đầy đủ thông tin công việc.");
+    if (!editTask.date || !editTask.session || !editTask.content.trim()) {
+      alert("Vui lòng nhập đầy đủ thông tin công việc (ngày, buổi, nội dung).");
       return;
     }
     let updatedTasks = Array.isArray(tasks) ? tasks : [];
@@ -175,7 +176,7 @@ function TaskTable() {
           </tr>
           {tasksByDate.map(task => (
             <tr key={task.id}>
-              <td>{`${task.session} - ${task.time}`}</td>
+              <td>{task.time ? `${task.session} - ${task.time}` : task.session}</td>
               <td>{task.content}</td>
               <td>{task.dept}</td>
               <td>{task.location}</td>
@@ -222,127 +223,136 @@ function TaskTable() {
           onClick={() => setShowActions(!showActions)}>
           {showActions ? "Ẩn" : "Hiện"}
         </Button>
+        <Button variant={showNotes ? "warning" : "outline-warning"} className="shadow-sm"
+          onClick={() => setShowNotes(!showNotes)}>
+          {showNotes ? "Ẩn ghi chú" : "Ghi chú"}
+        </Button>
       </div>
-      <div
-        ref={scrollRef}
-        id="task-table-scroll"
-        style={{
-          width: '100vw',
-          minWidth: '100vw',
-          maxWidth: '100vw',
-          margin: 0,
-          padding: 0,
-          borderRadius: 0,
-          border: '2px solid #1cb5e0',
-          boxShadow: 'none',
-          position: 'relative',
-          overflowX: 'auto',
-          overflowY: 'auto',
-          background: 'none',
-          maxHeight: '500px'
-        }}
-      >
-        <table className="table table-bordered mb-0"
+                      <div
+          ref={scrollRef}
+          id="task-table-scroll"
           style={{
-            width: '100%',
-            minWidth: 700,
-            fontSize: 33,
+            width: '100vw',
+            minWidth: '100vw',
+            maxWidth: '100vw',
             margin: 0,
-            borderCollapse: 'collapse',
-            background: 'transparent'
+            padding: 0,
+            borderRadius: 0,
+            border: '2px solid #1cb5e0',
+            boxShadow: 'none',
+            position: 'relative',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            background: 'none',
+            maxHeight: showNotes ? '580px' : '640px',
+            transition: 'max-height 0.3s ease'
           }}
         >
-          <thead style={{
-            position: 'sticky', top: 0, zIndex: 100,
-            background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
-            color: '#fff', fontSize: 33
-          }}>
-            <tr>
-              <th style={{ minWidth: 120 }}>Thời gian</th>
-              <th style={{ minWidth: 380 }}>Nội dung</th>
-              <th style={{ minWidth: 180 }}>Người thực hiện</th>
-              <th style={{ minWidth: 180 }}>Địa điểm</th>
-              {showActions && <th style={{ minWidth: 150 }}>Hành động</th>}
-            </tr>
-          </thead>
-          <tbody>{renderRows()}</tbody>
-        </table>
-      </div>
-      {/* Phần ghi chú tuần - thiết kế mới */}
-      <div
-        style={{
-          margin: "25px auto 0 auto",
-          padding: "20px 25px",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          borderRadius: "15px",
-          maxWidth: 900,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-          border: "1px solid rgba(255,255,255,0.2)"
-        }}
-      >
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "15px"
-        }}>
-          <span style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: "#fff",
-            marginRight: "15px",
-            textShadow: "0 2px 4px rgba(0,0,0,0.3)"
-          }}>📝 Ghi chú</span>
-          <span style={{
-            fontSize: 18,
-            color: "rgba(255,255,255,0.9)",
-            fontStyle: "italic"
-          }}>
-          </span>
+          <table className="table table-bordered mb-0"
+            style={{
+              width: '100%',
+              minWidth: 700,
+              fontSize: 33,
+              margin: 0,
+              borderCollapse: 'collapse',
+              background: 'transparent'
+            }}
+          >
+            <thead style={{
+              position: 'sticky', top: 0, zIndex: 100,
+              background: 'linear-gradient(90deg,#1cb5e0 0%,#000851 100%)',
+              color: '#fff', fontSize: 33
+            }}>
+              <tr>
+                <th style={{ minWidth: 120 }}>Thời gian</th>
+                <th style={{ minWidth: 380 }}>Nội dung</th>
+                <th style={{ minWidth: 180 }}>Người thực hiện</th>
+                <th style={{ minWidth: 180 }}>Địa điểm</th>
+                {showActions && <th style={{ minWidth: 150 }}>Hành động</th>}
+              </tr>
+            </thead>
+            <tbody>{renderRows()}</tbody>
+          </table>
         </div>
+      {/* Phần ghi chú tuần - gọn gàng */}
+      {showNotes && (
         <div
-          contentEditable
-          suppressContentEditableWarning
           style={{
-            outline: "none",
+            margin: "15px auto 0 auto",
             padding: "15px 20px",
-            minHeight: "60px",
-            borderRadius: "12px",
-            background: "rgba(255,255,255,0.95)",
-            border: "2px solid rgba(255,255,255,0.3)",
-            fontSize: 18,
-            fontFamily: "'Times New Roman', Times, serif",
-            lineHeight: "1.5",
-            color: "#333",
-            boxShadow: "inset 0 2px 8px rgba(0,0,0,0.1)",
-            transition: "all 0.3s ease"
-          }}
-          onBlur={e => {
-            const newNotes = { ...weekNotes };
-            newNotes[currentWeekKey] = e.target.innerText;
-            setWeekNotes(newNotes);
-          }}
-          onInput={e => {
-            const newNotes = { ...weekNotes };
-            newNotes[currentWeekKey] = e.currentTarget.innerText;
-            setWeekNotes(newNotes);
-          }}
-          onFocus={e => {
-            e.target.style.background = "rgba(255,255,255,1)";
-            e.target.style.border = "2px solid rgba(255,255,255,0.8)";
-            e.target.style.boxShadow = "inset 0 2px 8px rgba(0,0,0,0.1), 0 0 20px rgba(255,255,255,0.3)";
+            background: "#f8f9fa",
+            borderRadius: "6px",
+            maxWidth: "800px",
+            border: "1px solid #dee2e6"
           }}
         >
-          {weekNotes[currentWeekKey] || ""}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "12px",
+            borderBottom: "1px solid #007bff",
+            paddingBottom: "8px"
+          }}>
+            <div style={{
+              width: "24px",
+              height: "24px",
+              background: "#007bff",
+              borderRadius: "3px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              fontSize: "12px",
+              marginRight: "10px"
+            }}>
+              📝
+            </div>
+            <div style={{
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#212529"
+            }}>
+              Ghi chú tuần: {formatDateVN(start)} - {formatDateVN(end)}
+            </div>
+          </div>
+          
+          <div
+            contentEditable
+            suppressContentEditableWarning
+            style={{
+              outline: "none",
+              padding: "10px 12px",
+              minHeight: "32px",
+              maxHeight: "60px",
+              borderRadius: "4px",
+              background: "#fff",
+              border: "1px solid #ced4da",
+              fontSize: "14px",
+              fontFamily: "'Times New Roman', Times, serif",
+              lineHeight: "1.3",
+              color: "#495057",
+              transition: "border-color 0.2s ease",
+              overflowY: "auto"
+            }}
+            onBlur={e => {
+              const newNotes = { ...weekNotes };
+              newNotes[currentWeekKey] = e.target.innerText;
+              setWeekNotes(newNotes);
+            }}
+            onInput={e => {
+              const newNotes = { ...weekNotes };
+              newNotes[currentWeekKey] = e.target.innerText;
+              setWeekNotes(newNotes);
+            }}
+            onFocus={e => {
+              e.target.style.border = "2px solid #007bff";
+            }}
+            placeholder="Nhập ghi chú..."
+          >
+            {weekNotes[currentWeekKey] || ""}
+          </div>
         </div>
-        <div style={{
-          marginTop: "12px",
-          fontSize: 14,
-          color: "rgba(255,255,255,0.8)",
-          fontStyle: "italic"
-        }}>
-          💡 Nhấp vào ô ghi chú để chỉnh sửa. Ghi chú sẽ được lưu tự động cho từng tuần.
-        </div>
-      </div>
+      )}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: 22 }}>
@@ -372,7 +382,7 @@ function TaskTable() {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Giờ</Form.Label>
+              <Form.Label>Giờ (không bắt buộc)</Form.Label>
               <Form.Control
                 type="time"
                 value={editTask.time}
