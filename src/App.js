@@ -2,7 +2,7 @@ import React from "react";
 import TaskTable from "./components/TaskTable";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import logo from './logo.jpeg';
+import logo from './logo1.jpeg';
 
 function App() {
   return (
